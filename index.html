@@ -239,6 +239,48 @@ footer{background:#1a1a2e;color:#fff;padding:40px 5% 20px;margin-top:40px}
 .breadcrumb{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text-muted);margin-bottom:16px}
 .breadcrumb span{color:var(--text-muted)}
 
+/* ACCOUNT PANEL */
+.acct-layout{display:flex;min-height:400px}
+.acct-sidebar{width:180px;flex-shrink:0;border-right:1px solid var(--border);padding:16px 0}
+.acct-avatar{text-align:center;padding:16px 12px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.acct-avatar-img{width:60px;height:60px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 8px;overflow:hidden}
+.acct-avatar-img img{width:60px;height:60px;border-radius:50%;object-fit:cover}
+.acct-avatar-name{font-size:13px;font-weight:700;word-break:break-word}
+.acct-avatar-email{font-size:10px;color:var(--text-muted);word-break:break-all;margin-top:2px}
+.acct-menu-item{display:flex;align-items:center;gap:8px;padding:9px 16px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.acct-menu-item:hover{color:var(--text);background:var(--bg)}
+.acct-menu-item.active{color:var(--accent);background:var(--accent-light);border-left-color:var(--accent)}
+.acct-menu-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+.acct-content{flex:1;padding:20px 24px;overflow-y:auto;max-height:480px}
+.acct-section-title{font-size:14px;font-weight:700;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.acct-order-card{border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.acct-order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.acct-order-num{font-size:12px;font-weight:700;color:var(--accent)}
+.acct-order-date{font-size:11px;color:var(--text-muted)}
+.order-status{font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px}
+.status-process{background:#fef3c7;color:#92400e}
+.status-sent{background:#dbeafe;color:#1e40af}
+.status-done{background:#dcfce7;color:#166534}
+.status-cancel{background:#fee2e2;color:#991b1b}
+.acct-order-items{font-size:12px;color:var(--text-muted);margin-bottom:6px;line-height:1.5}
+.acct-order-total{font-size:13px;font-weight:700}
+.addr-card{border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.addr-card.primary{border-color:var(--accent)}
+.addr-badge{font-size:10px;font-weight:700;background:var(--accent-light);color:var(--accent);padding:2px 8px;border-radius:10px;margin-bottom:6px;display:inline-block}
+.addr-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.addr-phone{font-size:12px;color:var(--text-muted);margin-bottom:4px}
+.addr-detail{font-size:12px;color:var(--text-muted);line-height:1.5}
+.addr-actions{display:flex;gap:8px;margin-top:10px}
+.btn-addr-edit{font-size:12px;color:var(--accent);background:none;border:1px solid var(--accent);padding:4px 10px;border-radius:6px;cursor:pointer}
+.btn-addr-del{font-size:12px;color:var(--danger);background:none;border:1px solid var(--danger);padding:4px 10px;border-radius:6px;cursor:pointer}
+.btn-add-addr{width:100%;padding:10px;border:1.5px dashed var(--border);border-radius:10px;background:none;font-size:13px;color:var(--text-muted);margin-top:4px;transition:all .2s;cursor:pointer}
+.btn-add-addr:hover{border-color:var(--accent);color:var(--accent)}
+.notif-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.notif-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-top:2px}
+.notif-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.notif-time{font-size:11px;color:var(--text-muted)}
+@media(max-width:500px){.acct-layout{flex-direction:column}.acct-sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border)}.acct-avatar{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 16px}.acct-avatar-img{margin:0;width:44px;height:44px;font-size:18px}}
+
 /* MOBILE */
 @media(max-width:768px){
   .hero{padding:28px 20px;min-height:160px}
@@ -459,12 +501,12 @@ footer{background:#1a1a2e;color:#fff;padding:40px 5% 20px;margin-top:40px}
 
 <!-- ===== LOGIN MODAL ===== -->
 <div class="modal-overlay" id="loginModal">
-  <div class="modal">
+  <div class="modal" style="max-width:620px">
     <div class="modal-header">
-      <h3>Akun Saya</h3>
+      <h3 id="loginModalTitle">Akun Saya</h3>
       <button class="modal-close" onclick="closeLogin()">✕</button>
     </div>
-    <div class="modal-body" id="loginBody"></div>
+    <div class="modal-body" id="loginBody" style="padding:0"></div>
   </div>
 </div>
 
@@ -485,7 +527,7 @@ footer{background:#1a1a2e;color:#fff;padding:40px 5% 20px;margin-top:40px}
 <!-- ===== FIREBASE + APP LOGIC ===== -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -517,6 +559,10 @@ window.state = {
   pdQty: 1,
   pdSize: null,
   pdColor: null,
+  acctTab: 'profile',
+  profileData: {},
+  addresses: JSON.parse(localStorage.getItem('addresses')||'[]'),
+  orders: JSON.parse(localStorage.getItem('orders')||'[]'),
 };
 
 // ===== SAMPLE PRODUCTS (fallback + supplement to Firebase) =====
@@ -552,9 +598,23 @@ window.showToast = (msg, type='') => {
 };
 
 // ===== AUTH =====
-onAuthStateChanged(auth, u => {
+onAuthStateChanged(auth, async u => {
   state.user = u;
   document.getElementById('navUserLabel').textContent = u ? (u.displayName||'Akun').split(' ')[0] : 'Masuk';
+  if(u) {
+    await loadProfileData();
+    if(state.profileData.addresses?.length) state.addresses = state.profileData.addresses;
+    // Pre-fill checkout dari profil
+    if(state.profileData.name) state.checkoutData.name = state.profileData.name;
+    if(state.profileData.phone) state.checkoutData.phone = state.profileData.phone;
+    if(state.addresses[0]) {
+      const a = state.addresses[0];
+      state.checkoutData.address = a.address;
+      state.checkoutData.city = a.city;
+      state.checkoutData.zip = a.zip;
+      state.checkoutData.province = a.province;
+    }
+  }
 });
 
 window.openLogin = () => {
@@ -563,41 +623,293 @@ window.openLogin = () => {
 };
 window.closeLogin = () => document.getElementById('loginModal').classList.remove('open');
 
+// ===== PROFILE HELPERS =====
+async function loadProfileData() {
+  if(!state.user) return;
+  try {
+    const snap = await getDoc(doc(db,'users',state.user.uid));
+    if(snap.exists()) {
+      state.profileData = snap.data();
+      if(state.profileData.addresses) state.addresses = state.profileData.addresses;
+    }
+  } catch(e) {
+    const saved = localStorage.getItem('profile_'+state.user.uid);
+    if(saved) state.profileData = JSON.parse(saved);
+  }
+}
+async function saveProfileData(data) {
+  state.profileData = {...state.profileData, ...data};
+  try { await setDoc(doc(db,'users',state.user.uid), state.profileData, {merge:true}); }
+  catch(e) { localStorage.setItem('profile_'+state.user.uid, JSON.stringify(state.profileData)); }
+}
+
+// ===== AUTH MODAL =====
 window.renderLoginModal = (tab='login') => {
   const body = document.getElementById('loginBody');
-  if (state.user) {
-    body.innerHTML = `
-      <div style="text-align:center;padding:16px 0">
-        <div style="width:72px;height:72px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px">${state.user.photoURL?`<img src="${state.user.photoURL}" style="width:72px;height:72px;border-radius:50%;object-fit:cover">`:'👤'}</div>
-        <h4 style="margin-bottom:4px">${state.user.displayName||'Pengguna'}</h4>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">${state.user.email}</p>
-        <div style="display:grid;gap:8px">
-          <button class="btn-next" onclick="closeLogin()">Tutup</button>
-          <button onclick="doSignOut()" style="padding:12px;border:1px solid var(--border);border-radius:8px;background:none;font-size:14px;color:var(--danger)">Keluar</button>
-        </div>
-      </div>`;
-    return;
-  }
+  document.getElementById('loginModalTitle').textContent = state.user ? 'Akun Saya' : 'Masuk / Daftar';
+  if (state.user) { renderAccountPanel(); return; }
   body.innerHTML = `
-    <div class="auth-tabs">
-      <div class="auth-tab ${tab==='login'?'active':''}" onclick="renderLoginModal('login')">Masuk</div>
-      <div class="auth-tab ${tab==='register'?'active':''}" onclick="renderLoginModal('register')">Daftar</div>
+    <div style="padding:0 24px 24px">
+      <div class="auth-tabs" style="margin:0 -24px 20px;padding:0 24px">
+        <div class="auth-tab ${tab==='login'?'active':''}" onclick="renderLoginModal('login')">Masuk</div>
+        <div class="auth-tab ${tab==='register'?'active':''}" onclick="renderLoginModal('register')">Daftar</div>
+      </div>
+      <div class="social-btns">
+        <button class="social-btn" onclick="doGoogle()">🌐 Lanjut dengan Google</button>
+      </div>
+      <div class="divider">atau dengan email</div>
+      ${tab==='login'?`
+        <div class="form-group"><label>Email</label><input type="email" id="authEmail" placeholder="email@contoh.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="authPass" placeholder="Password"></div>
+        <button class="btn-next" onclick="doLogin()">Masuk</button>
+        <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:12px">Lupa password? <a href="#" style="color:var(--accent)">Reset di sini</a></p>
+      `:`
+        <div class="form-group"><label>Nama Lengkap</label><input type="text" id="authName" placeholder="Nama kamu"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="authEmail" placeholder="email@contoh.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="authPass" placeholder="Min. 6 karakter"></div>
+        <button class="btn-next" onclick="doRegister()">Buat Akun</button>
+      `}
+    </div>`;
+};
+
+window.renderAccountPanel = (tab) => {
+  if(tab) state.acctTab = tab;
+  const u = state.user;
+  const p = state.profileData;
+  const body = document.getElementById('loginBody');
+  document.getElementById('loginModalTitle').textContent = 'Akun Saya';
+
+  const menuItems = [
+    {id:'profile', icon:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', label:'Profil'},
+    {id:'orders',  icon:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>', label:'Pesanan'},
+    {id:'address', icon:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>', label:'Alamat'},
+    {id:'notif',   icon:'<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>', label:'Notifikasi'},
+    {id:'security',icon:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>', label:'Keamanan'},
+  ];
+
+  body.innerHTML = `<div class="acct-layout">
+    <div class="acct-sidebar">
+      <div class="acct-avatar">
+        <div class="acct-avatar-img">${u.photoURL?`<img src="${u.photoURL}" alt="">`:'👤'}</div>
+        <div class="acct-avatar-name">${u.displayName||'Pengguna'}</div>
+        <div class="acct-avatar-email">${u.email}</div>
+      </div>
+      ${menuItems.map(m=>`
+        <div class="acct-menu-item ${state.acctTab===m.id?'active':''}" onclick="renderAccountPanel('${m.id}')">
+          <svg viewBox="0 0 24 24">${m.icon}</svg>${m.label}
+        </div>`).join('')}
+      <div class="acct-menu-item" onclick="doSignOut()" style="margin-top:8px;color:var(--danger)">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Keluar
+      </div>
     </div>
-    <div class="social-btns">
-      <button class="social-btn" onclick="doGoogle()">🌐 Google</button>
-    </div>
-    <div class="divider">atau</div>
-    ${tab==='login'?`
-      <div class="form-group"><label>Email</label><input type="email" id="authEmail" placeholder="email@contoh.com"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="authPass" placeholder="Password"></div>
-      <button class="btn-next" onclick="doLogin()">Masuk</button>
-      <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:12px">Lupa password? <a href="#" style="color:var(--accent)">Reset di sini</a></p>
-    `:`
-      <div class="form-group"><label>Nama Lengkap</label><input type="text" id="authName" placeholder="Nama kamu"></div>
-      <div class="form-group"><label>Email</label><input type="email" id="authEmail" placeholder="email@contoh.com"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="authPass" placeholder="Min. 6 karakter"></div>
-      <button class="btn-next" onclick="doRegister()">Buat Akun</button>
-    `}`;
+    <div class="acct-content" id="acctContent"></div>
+  </div>`;
+
+  renderAcctTab();
+};
+
+window.renderAcctTab = () => {
+  const el = document.getElementById('acctContent');
+  const u = state.user;
+  const p = state.profileData;
+  if(!el) return;
+
+  if(state.acctTab === 'profile') {
+    el.innerHTML = `
+      <div class="acct-section-title">Data Diri</div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:14px;background:var(--bg);border-radius:10px">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent-light);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${u.photoURL?`<img src="${u.photoURL}" style="width:56px;height:56px;object-fit:cover">`:'👤'}</div>
+        <div>
+          <div style="font-size:14px;font-weight:700">${u.displayName||'Pengguna'}</div>
+          <div style="font-size:12px;color:var(--text-muted)">${u.email}</div>
+          <div style="font-size:11px;color:var(--success);margin-top:2px">✓ Akun terverifikasi</div>
+        </div>
+      </div>
+      <div class="form-group"><label>Nama Lengkap</label><input id="pfName" value="${p.name||u.displayName||''}" placeholder="Nama lengkap kamu"></div>
+      <div class="form-row">
+        <div class="form-group"><label>No. HP</label><input id="pfPhone" value="${p.phone||''}" placeholder="08xx-xxxx-xxxx" type="tel"></div>
+        <div class="form-group"><label>Tanggal Lahir</label><input id="pfDob" value="${p.dob||''}" type="date"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Jenis Kelamin</label>
+          <select id="pfGender">
+            <option value="">Pilih...</option>
+            <option ${p.gender==='L'?'selected':''} value="L">Laki-laki</option>
+            <option ${p.gender==='P'?'selected':''} value="P">Perempuan</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Pekerjaan</label><input id="pfJob" value="${p.job||''}" placeholder="Pekerjaan (opsional)"></div>
+      </div>
+      <button class="btn-next" onclick="saveProfile()">Simpan Perubahan</button>`;
+  }
+  else if(state.acctTab === 'orders') {
+    const orders = state.orders.length ? state.orders : [
+      {num:'TE-ABC123',date:'20 Jun 2025',items:'Kemeja Oxford Premium ×1, Sneakers Casual ×1',total:648000,status:'sent'},
+      {num:'TE-DEF456',date:'10 Jun 2025',items:'Kaos Polos Oversize ×3',total:267000,status:'done'},
+    ];
+    el.innerHTML = `
+      <div class="acct-section-title">Riwayat Pesanan</div>
+      ${orders.map(o=>`
+        <div class="acct-order-card">
+          <div class="acct-order-head">
+            <span class="acct-order-num">${o.num}</span>
+            <span class="order-status status-${o.status}">${{process:'Diproses',sent:'Dikirim',done:'Selesai',cancel:'Dibatalkan'}[o.status]}</span>
+          </div>
+          <div class="acct-order-date" style="margin-bottom:6px">${o.date}</div>
+          <div class="acct-order-items">${o.items}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="acct-order-total">Total: ${fmtRp(o.total)}</span>
+            ${o.status==='done'?`<button onclick="showToast('Fitur ulasan segera hadir!','success')" style="font-size:12px;color:var(--accent);background:none;border:1px solid var(--accent);padding:4px 10px;border-radius:6px;cursor:pointer">Beri Ulasan</button>`:''}
+            ${o.status==='sent'?`<button onclick="showToast('Paket sedang dalam pengiriman','success')" style="font-size:12px;color:var(--accent);background:none;border:1px solid var(--accent);padding:4px 10px;border-radius:6px;cursor:pointer">Lacak</button>`:''}
+          </div>
+        </div>`).join('')}
+      ${!orders.length?`<div style="text-align:center;padding:32px;color:var(--text-muted)">Belum ada pesanan</div>`:''}`;
+  }
+  else if(state.acctTab === 'address') {
+    el.innerHTML = `
+      <div class="acct-section-title">Daftar Alamat</div>
+      <div id="addrList"></div>
+      <button class="btn-add-addr" onclick="showAddAddrForm()">+ Tambah Alamat Baru</button>
+      <div id="addrForm"></div>`;
+    renderAddrList();
+  }
+  else if(state.acctTab === 'notif') {
+    const notifs = [
+      {icon:'📦',bg:'#dbeafe',title:'Pesanan TE-ABC123 sedang dikirim',time:'2 jam lalu',unread:true},
+      {icon:'🎉',bg:'#dcfce7',title:'Flash sale dimulai! Diskon hingga 70%',time:'5 jam lalu',unread:true},
+      {icon:'✅',bg:'#dcfce7',title:'Pesanan TE-DEF456 telah selesai',time:'15 Jun 2025',unread:false},
+      {icon:'❤️',bg:'#fee2e2',title:'Produk wishlist kamu sedang diskon',time:'14 Jun 2025',unread:false},
+    ];
+    el.innerHTML = `
+      <div class="acct-section-title">Notifikasi</div>
+      ${notifs.map(n=>`
+        <div class="notif-item ${n.unread?'notif-unread':''}">
+          <div class="notif-icon" style="background:${n.bg}">${n.icon}</div>
+          <div>
+            <div class="notif-title">${n.title}${n.unread?' <span style="color:var(--accent)">●</span>':''}</div>
+            <div class="notif-time">${n.time}</div>
+          </div>
+        </div>`).join('')}`;
+  }
+  else if(state.acctTab === 'security') {
+    el.innerHTML = `
+      <div class="acct-section-title">Keamanan Akun</div>
+      <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:13px;font-weight:600">Password</div>
+            <div style="font-size:12px;color:var(--text-muted)">Terakhir diubah: tidak diketahui</div>
+          </div>
+          <button onclick="showToast('Fitur ganti password segera hadir!','success')" style="font-size:12px;color:var(--accent);background:none;border:1px solid var(--accent);padding:6px 12px;border-radius:6px;cursor:pointer">Ubah</button>
+        </div>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:13px;font-weight:600">Verifikasi 2 Langkah</div>
+            <div style="font-size:12px;color:var(--text-muted)">Tambah keamanan ekstra pada akunmu</div>
+          </div>
+          <button onclick="showToast('Fitur 2FA segera hadir!','success')" style="font-size:12px;background:var(--accent);color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Aktifkan</button>
+        </div>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">Sesi Aktif</div>
+        <div style="font-size:12px;color:var(--text-muted)">📱 Browser saat ini · ${new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>
+      </div>
+      <button onclick="doSignOut()" style="margin-top:16px;width:100%;padding:12px;border:1.5px solid var(--danger);border-radius:8px;background:none;font-size:14px;color:var(--danger);cursor:pointer;font-weight:600">Keluar dari Semua Perangkat</button>`;
+  }
+};
+
+window.saveProfile = async () => {
+  const data = {
+    name: document.getElementById('pfName').value,
+    phone: document.getElementById('pfPhone').value,
+    dob: document.getElementById('pfDob').value,
+    gender: document.getElementById('pfGender').value,
+    job: document.getElementById('pfJob').value,
+  };
+  if(!data.name){showToast('Nama tidak boleh kosong','error');return}
+  await saveProfileData(data);
+  if(state.user) await updateProfile(state.user,{displayName:data.name});
+  showToast('Profil berhasil disimpan ✓','success');
+  renderAccountPanel('profile');
+};
+
+window.renderAddrList = () => {
+  const el = document.getElementById('addrList');
+  if(!state.addresses.length){el.innerHTML=`<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px">Belum ada alamat tersimpan</div>`;return}
+  el.innerHTML = state.addresses.map((a,i)=>`
+    <div class="addr-card ${i===0?'primary':''}">
+      ${i===0?`<div class="addr-badge">📍 Utama</div>`:''}
+      <div class="addr-name">${a.name}</div>
+      <div class="addr-phone">${a.phone}</div>
+      <div class="addr-detail">${a.address}, ${a.city} ${a.zip}<br>${a.province}</div>
+      <div class="addr-actions">
+        <button class="btn-addr-edit" onclick="showAddAddrForm(${i})">Edit</button>
+        <button class="btn-addr-del" onclick="deleteAddr(${i})">Hapus</button>
+        ${i>0?`<button class="btn-addr-edit" onclick="setPrimaryAddr(${i})" style="color:var(--success);border-color:var(--success)">Jadikan Utama</button>`:''}
+      </div>
+    </div>`).join('');
+};
+
+window.showAddAddrForm = (editIdx=null) => {
+  const a = editIdx!==null ? state.addresses[editIdx] : {};
+  document.getElementById('addrForm').innerHTML = `
+    <div style="border:1.5px solid var(--accent);border-radius:10px;padding:16px;margin-top:12px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:14px;color:var(--accent)">${editIdx!==null?'Edit':'Tambah'} Alamat</div>
+      <div class="form-row">
+        <div class="form-group"><label>Nama Penerima</label><input id="adName" value="${a.name||''}" placeholder="Nama penerima"></div>
+        <div class="form-group"><label>No. HP</label><input id="adPhone" value="${a.phone||''}" placeholder="08xx"></div>
+      </div>
+      <div class="form-group"><label>Alamat Lengkap</label><textarea id="adAddr" rows="2" placeholder="Jalan, No., RT/RW">${a.address||''}</textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Kota</label><input id="adCity" value="${a.city||''}" placeholder="Kota/Kabupaten"></div>
+        <div class="form-group"><label>Kode Pos</label><input id="adZip" value="${a.zip||''}" placeholder="Kode pos"></div>
+      </div>
+      <div class="form-group"><label>Provinsi</label>
+        <select id="adProv">${['Jawa Barat','DKI Jakarta','Jawa Tengah','Jawa Timur','Banten','Sumatera Utara','Sumatera Selatan','Kalimantan Timur','Sulawesi Selatan','Bali','Lainnya'].map(pr=>`<option ${a.province===pr?'selected':''}>${pr}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn-next" style="flex:1;padding:11px" onclick="saveAddr(${editIdx})">Simpan Alamat</button>
+        <button onclick="document.getElementById('addrForm').innerHTML=''" style="padding:11px 16px;border:1px solid var(--border);border-radius:8px;background:none;font-size:13px;cursor:pointer">Batal</button>
+      </div>
+    </div>`;
+  document.getElementById('addrForm').scrollIntoView({behavior:'smooth',block:'nearest'});
+};
+
+window.saveAddr = async (editIdx) => {
+  const addr = {
+    name:document.getElementById('adName').value,
+    phone:document.getElementById('adPhone').value,
+    address:document.getElementById('adAddr').value,
+    city:document.getElementById('adCity').value,
+    zip:document.getElementById('adZip').value,
+    province:document.getElementById('adProv').value,
+  };
+  if(!addr.name||!addr.phone||!addr.address||!addr.city){showToast('Lengkapi semua field','error');return}
+  if(editIdx!==null) state.addresses[editIdx]=addr;
+  else state.addresses.push(addr);
+  localStorage.setItem('addresses',JSON.stringify(state.addresses));
+  await saveProfileData({addresses:state.addresses});
+  showToast('Alamat berhasil disimpan ✓','success');
+  renderAcctTab();
+};
+
+window.deleteAddr = async (i) => {
+  state.addresses.splice(i,1);
+  localStorage.setItem('addresses',JSON.stringify(state.addresses));
+  await saveProfileData({addresses:state.addresses});
+  showToast('Alamat dihapus');
+  renderAddrList();
+};
+
+window.setPrimaryAddr = async (i) => {
+  const [addr] = state.addresses.splice(i,1);
+  state.addresses.unshift(addr);
+  localStorage.setItem('addresses',JSON.stringify(state.addresses));
+  await saveProfileData({addresses:state.addresses});
+  showToast('Alamat utama diperbarui ✓','success');
+  renderAddrList();
 };
 
 window.doLogin = async () => {
@@ -996,6 +1308,18 @@ window.selectPayment = (id) => {
 
 window.placeOrder = () => {
   const orderNum='TE-'+Date.now().toString(36).toUpperCase();
+  const subtotal=state.cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const ship=subtotal>=150000?0:15000;
+  const disc=subtotal>=500000?Math.round(subtotal*0.05):0;
+  const newOrder = {
+    num: orderNum,
+    date: new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}),
+    items: state.cart.map(c=>c.name+' ×'+c.qty).join(', '),
+    total: subtotal+ship-disc,
+    status: 'process',
+  };
+  state.orders.unshift(newOrder);
+  localStorage.setItem('orders', JSON.stringify(state.orders));
   document.getElementById('checkoutContent').innerHTML=`
     <div class="order-success">
       <div class="success-icon">✅</div>
@@ -1003,8 +1327,9 @@ window.placeOrder = () => {
       <p>Terima kasih telah berbelanja di TokoElegan</p>
       <div class="order-num">${orderNum}</div>
       <p style="font-size:12px">Nomor pesanan kamu. Simpan untuk tracking.</p>
-      <div style="margin-top:20px">
-        <button class="btn-next" onclick="closeCheckout();state.cart=[];saveCart();updateCartUI();showToast('Pesanan dikonfirmasi! ✓','success')">Selesai</button>
+      <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px">
+        <button class="btn-next" onclick="closeCheckout();state.cart=[];saveCart();updateCartUI();showToast('Pesanan dikonfirmasi! ✓','success')">Selesai Belanja</button>
+        <button onclick="closeCheckout();state.cart=[];saveCart();updateCartUI();openLogin();renderAccountPanel('orders')" style="padding:12px;border:1px solid var(--accent);border-radius:8px;background:none;font-size:13px;color:var(--accent);cursor:pointer">Lihat Pesanan Saya</button>
       </div>
     </div>`;
   [1,2,3].forEach(i=>document.getElementById('step'+i+'tab').className='chk-step done');
