@@ -1206,7 +1206,33 @@ window.renderWishlist = () => {
 window.openCheckout = () => {
   if(!state.cart.length){showToast('Keranjang kosong!','error');return}
   closeCart();
-  state.checkoutStep=1;
+
+  // Selalu reset & isi ulang dari profil + alamat utama
+  state.checkoutData = {};
+  const prof = state.profileData;
+  const addr0 = state.addresses[0];
+
+  if(state.user) {
+    // Nama & HP dari profil
+    state.checkoutData.name    = prof.name    || state.user.displayName || '';
+    state.checkoutData.phone   = prof.phone   || '';
+    // Alamat dari alamat utama tersimpan
+    if(addr0) {
+      state.checkoutData._addrIdx = 0;
+      state.checkoutData.name    = addr0.name  || state.checkoutData.name;
+      state.checkoutData.phone   = addr0.phone || state.checkoutData.phone;
+      state.checkoutData.address = addr0.address;
+      state.checkoutData.city    = addr0.city;
+      state.checkoutData.zip     = addr0.zip   || '';
+      state.checkoutData.province= addr0.province || '';
+    }
+    state.checkoutData.kurir = 'JNE Regular (2-3 hari)';
+  }
+
+  // Langsung ke pembayaran jika alamat sudah lengkap
+  const d = state.checkoutData;
+  const addrReady = d.name && d.phone && d.address && d.city;
+  state.checkoutStep = (state.user && addrReady) ? 2 : 1;
   renderCheckout();
   document.getElementById('checkoutModal').classList.add('open');
 };
@@ -1225,84 +1251,191 @@ window.renderCheckout = () => {
   const content=document.getElementById('checkoutContent');
 
   if(state.checkoutStep===1) {
+    // Pilih alamat tersimpan atau isi manual
+    const addrPicker = state.user && state.addresses.length ? `
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">Alamat Tersimpan</div>
+        ${state.addresses.map((a,i)=>`
+          <div onclick="pickAddr(${i})" style="border:1.5px solid ${d._addrIdx===i?'var(--accent)':'var(--border)'};background:${d._addrIdx===i?'var(--accent-light)':'var(--surface)'};border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                ${i===0?`<span style="font-size:10px;font-weight:700;background:var(--accent-light);color:var(--accent);padding:1px 7px;border-radius:10px;margin-right:6px">Utama</span>`:''}
+                <span style="font-size:13px;font-weight:700">${a.name}</span>
+                <span style="font-size:12px;color:var(--text-muted);margin-left:8px">${a.phone}</span>
+              </div>
+              <div style="width:18px;height:18px;border-radius:50%;border:2px solid ${d._addrIdx===i?'var(--accent)':'var(--border)'};background:${d._addrIdx===i?'var(--accent)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                ${d._addrIdx===i?'<span style="color:#fff;font-size:11px">✓</span>':''}
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:4px">${a.address}, ${a.city} ${a.zip}, ${a.province}</div>
+          </div>`).join('')}
+        <div onclick="showManualAddr()" style="border:1.5px dashed var(--border);border-radius:10px;padding:10px;text-align:center;font-size:13px;color:var(--text-muted);cursor:pointer;margin-bottom:16px;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">+ Gunakan Alamat Lain</div>
+      </div>` : '';
+
+    const showManual = !state.user || !state.addresses.length;
     content.innerHTML=`
-      <div class="form-row">
-        <div class="form-group"><label>Nama Penerima</label><input id="ckName" value="${d.name||''}" placeholder="Nama lengkap"></div>
-        <div class="form-group"><label>No. HP</label><input id="ckPhone" value="${d.phone||''}" placeholder="08xx"></div>
+      ${addrPicker}
+      <div id="manualAddrWrap" style="display:${showManual?'block':'none'}">
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">${state.addresses.length?'Alamat Lain':'Alamat Pengiriman'}</div>
+        <div class="form-row">
+          <div class="form-group"><label>Nama Penerima</label><input id="ckName" value="${d.name||''}" placeholder="Nama lengkap"></div>
+          <div class="form-group"><label>No. HP</label><input id="ckPhone" value="${d.phone||''}" placeholder="08xx" type="tel"></div>
+        </div>
+        <div class="form-group"><label>Alamat Lengkap</label><textarea id="ckAddr" rows="2" placeholder="Jalan, No. Rumah, RT/RW">${d.address||''}</textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label>Kota</label><input id="ckCity" value="${d.city||''}" placeholder="Kota"></div>
+          <div class="form-group"><label>Kode Pos</label><input id="ckZip" value="${d.zip||''}" placeholder="Kode pos"></div>
+        </div>
+        <div class="form-group"><label>Provinsi</label>
+          <select id="ckProv">
+            ${['Jawa Barat','DKI Jakarta','Jawa Tengah','Jawa Timur','Banten','Sumatera Utara','Sumatera Selatan','Kalimantan Timur','Sulawesi Selatan','Bali','Lainnya'].map(pr=>`<option ${d.province===pr?'selected':''}>${pr}</option>`).join('')}
+          </select>
+        </div>
       </div>
-      <div class="form-group"><label>Alamat Lengkap</label><textarea id="ckAddr" rows="2" placeholder="Jalan, No. Rumah, RT/RW">${d.address||''}</textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label>Kota</label><input id="ckCity" value="${d.city||''}" placeholder="Kota"></div>
-        <div class="form-group"><label>Kode Pos</label><input id="ckZip" value="${d.zip||''}" placeholder="Kode pos"></div>
-      </div>
-      <div class="form-group"><label>Provinsi</label>
-        <select id="ckProv">
-          ${['Jawa Barat','DKI Jakarta','Jawa Tengah','Jawa Timur','Banten','Sumatera Utara','Sumatera Selatan','Kalimantan Timur','Sulawesi Selatan','Bali','Lainnya'].map(p=>`<option ${d.province===p?'selected':''}>${p}</option>`).join('')}
-        </select>
-      </div>
-      <div class="form-group"><label>Kurir</label>
+      <div class="form-group" style="margin-top:4px"><label>Kurir Pengiriman</label>
         <select id="ckKurir">
           ${['JNE Regular (2-3 hari)','JNE YES (1 hari)','J&T Express','SiCepat REG','Gojek Instant'].map(k=>`<option ${d.kurir===k?'selected':''}>${k}</option>`).join('')}
         </select>
       </div>
+      ${!state.user?`<div style="background:var(--accent-light);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--accent)">💡 <a onclick="closeCheckout();openLogin()" style="font-weight:700;cursor:pointer;text-decoration:underline">Masuk</a> untuk menyimpan alamat & checkout lebih cepat</div>`:''}
       <button class="btn-next" onclick="nextCheckout(1)">Lanjut ke Pembayaran →</button>`;
+
+    // set default pilih alamat utama
+    if(state.user && state.addresses.length && d._addrIdx===undefined) {
+      state.checkoutData._addrIdx = 0;
+      // re-render supaya highlight muncul
+      setTimeout(()=>renderCheckout(),0);
+    }
+
   } else if(state.checkoutStep===2) {
+    // Pastikan kurir ada default
+    if(!d.kurir) d.kurir = 'JNE Regular (2-3 hari)';
+    if(!d.payment) d.payment = 'bca';
     content.innerHTML=`
+      <div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.4px">📍 ALAMAT PENGIRIMAN</div>
+          <button onclick="state.checkoutStep=1;renderCheckout()" style="font-size:12px;color:var(--accent);background:none;border:none;cursor:pointer;font-weight:600">Ubah</button>
+        </div>
+        <div style="font-size:13px"><b>${d.name}</b> <span style="color:var(--text-muted)">· ${d.phone}</span></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${d.address}, ${d.city}${d.zip?' '+d.zip:''}, ${d.province||''}</div>
+        <div style="margin-top:8px">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px">Kurir</label>
+          <select id="ckKurirPay" style="width:100%;margin-top:4px;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--surface);outline:none">
+            ${['JNE Regular (2-3 hari)','JNE YES (1 hari)','J&T Express','SiCepat REG','Gojek Instant'].map(k=>`<option ${d.kurir===k?'selected':''}>${k}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Metode Pembayaran</div>
       <div class="payment-options">
-        ${[{id:'bca',icon:'BCA',color:'#0064b4',name:'Transfer BCA',desc:'Bank Central Asia'},
-           {id:'mandiri',icon:'MDR',color:'#003d7a',name:'Transfer Mandiri',desc:'Bank Mandiri'},
-           {id:'bri',icon:'BRI',color:'#00529b',name:'Transfer BRI',desc:'Bank Rakyat Indonesia'},
+        ${[{id:'bca',icon:'BCA',color:'#0064b4',name:'Transfer BCA',desc:'Virtual Account BCA'},
+           {id:'mandiri',icon:'MDR',color:'#003d7a',name:'Transfer Mandiri',desc:'Virtual Account Mandiri'},
+           {id:'bri',icon:'BRI',color:'#00529b',name:'Transfer BRI',desc:'Virtual Account BRI'},
            {id:'gopay',icon:'GP',color:'#00aed6',name:'GoPay',desc:'Bayar via aplikasi Gojek'},
            {id:'ovo',icon:'OVO',color:'#4c3494',name:'OVO',desc:'Bayar via aplikasi OVO'},
            {id:'cod',icon:'COD',color:'#2d8a4e',name:'Bayar di Tempat',desc:'Cash on Delivery'}
           ].map(pay=>`
-          <div class="pay-option ${(d.payment||'bca')===pay.id?'selected':''}" onclick="selectPayment('${pay.id}')">
+          <div class="pay-option ${d.payment===pay.id?'selected':''}" onclick="selectPayment('${pay.id}')">
             <div class="pay-icon" style="background:${pay.color}">${pay.icon}</div>
             <div><div class="pay-name">${pay.name}</div><div class="pay-desc">${pay.desc}</div></div>
           </div>`).join('')}
       </div>
-      <button class="btn-back" onclick="state.checkoutStep=1;renderCheckout()">← Kembali</button>
-      <button class="btn-next" style="width:auto;padding:12px 28px" onclick="nextCheckout(2)">Konfirmasi →</button>`;
+      <button class="btn-next" onclick="saveKurirAndNext()">Konfirmasi Pesanan →</button>`;
+
   } else if(state.checkoutStep===3) {
     content.innerHTML=`
-      <div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:16px">
+      <div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:12px">
         <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">RINGKASAN PESANAN</div>
-        ${state.cart.map(c=>`<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>${c.name} ×${c.qty}</span><span>${fmtRp(c.price*c.qty)}</span></div>`).join('')}
+        ${state.cart.map(c=>`<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--text-muted)">${c.name} ×${c.qty}</span><span>${fmtRp(c.price*c.qty)}</span></div>`).join('')}
         <div style="border-top:1px solid var(--border);margin:8px 0;padding-top:8px">
-          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted)"><span>Ongkir</span><span>${ship===0?'GRATIS':fmtRp(ship)}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted)"><span>Ongkir</span><span>${ship===0?'<span style="color:var(--success)">GRATIS</span>':fmtRp(ship)}</span></div>
           ${disc?`<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--success)"><span>Diskon 5%</span><span>- ${fmtRp(disc)}</span></div>`:''}
-          <div style="display:flex;justify-content:space-between;font-weight:700;font-size:15px;margin-top:6px"><span>Total</span><span style="color:var(--accent)">${fmtRp(total)}</span></div>
+          <div style="display:flex;justify-content:space-between;font-weight:700;font-size:15px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><span>Total Bayar</span><span style="color:var(--accent)">${fmtRp(total)}</span></div>
         </div>
       </div>
-      <div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px">
+      <div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:12px;font-size:13px">
         <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:6px">ALAMAT PENGIRIMAN</div>
-        <b>${d.name}</b> · ${d.phone}<br>${d.address}, ${d.city} ${d.zip}, ${d.province}<br>
-        <span style="color:var(--text-muted)">Kurir: ${d.kurir}</span>
+        <b>${d.name}</b> · ${d.phone}<br>
+        <span style="color:var(--text-muted)">${d.address}, ${d.city} ${d.zip||''}, ${d.province||''}</span><br>
+        <span style="color:var(--text-muted);font-size:12px">🚚 ${d.kurir||'JNE Regular'}</span>
       </div>
-      <button class="btn-back" onclick="state.checkoutStep=2;renderCheckout()">← Kembali</button>
-      <button class="btn-next" style="width:auto;padding:12px 28px" onclick="placeOrder()">✓ Buat Pesanan</button>`;
+      <div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:6px">PEMBAYARAN</div>
+        <span>${{bca:'Transfer BCA',mandiri:'Transfer Mandiri',bri:'Transfer BRI',gopay:'GoPay',ovo:'OVO',cod:'Bayar di Tempat'}[d.payment]||d.payment}</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-back" onclick="state.checkoutStep=2;renderCheckout()">← Kembali</button>
+        <button class="btn-next" style="flex:1" onclick="placeOrder()">✓ Buat Pesanan</button>
+      </div>`;
   }
 };
 
-window.nextCheckout = (step) => {
-  if(step===1){
-    const name=document.getElementById('ckName').value;
-    const phone=document.getElementById('ckPhone').value;
-    const addr=document.getElementById('ckAddr').value;
-    const city=document.getElementById('ckCity').value;
-    if(!name||!phone||!addr||!city){showToast('Lengkapi semua field','error');return}
-    state.checkoutData.name=name;state.checkoutData.phone=phone;
-    state.checkoutData.address=addr;state.checkoutData.city=city;
-    state.checkoutData.zip=document.getElementById('ckZip').value;
-    state.checkoutData.province=document.getElementById('ckProv').value;
-    state.checkoutData.kurir=document.getElementById('ckKurir').value;
-  }
-  state.checkoutStep=step+1;
+window.pickAddr = (i) => {
+  const a = state.addresses[i];
+  state.checkoutData._addrIdx = i;
+  state.checkoutData.name = a.name;
+  state.checkoutData.phone = a.phone;
+  state.checkoutData.address = a.address;
+  state.checkoutData.city = a.city;
+  state.checkoutData.zip = a.zip;
+  state.checkoutData.province = a.province;
+  document.getElementById('manualAddrWrap').style.display = 'none';
+  renderCheckout();
+};
+
+window.showManualAddr = () => {
+  state.checkoutData._addrIdx = undefined;
+  state.checkoutData.name = state.profileData.name || '';
+  state.checkoutData.phone = state.profileData.phone || '';
+  state.checkoutData.address = '';
+  state.checkoutData.city = '';
+  state.checkoutData.zip = '';
+  state.checkoutData.province = '';
+  renderCheckout();
+  document.getElementById('manualAddrWrap').style.display = 'block';
+};
+
+window.saveKurirAndNext = () => {
+  const kurir = document.getElementById('ckKurirPay');
+  if(kurir) state.checkoutData.kurir = kurir.value;
+  if(!state.checkoutData.payment) state.checkoutData.payment = 'bca';
+  state.checkoutStep = 3;
   renderCheckout();
 };
 
 window.selectPayment = (id) => {
-  state.checkoutData.payment=id;
+  state.checkoutData.payment = id;
+  document.querySelectorAll('.pay-option').forEach(el => {
+    const isSelected = el.getAttribute('onclick') === `selectPayment('${id}')`;
+    el.classList.toggle('selected', isSelected);
+  });
+};
+
+window.nextCheckout = (step) => {
+  if(step===1){
+    const wrap = document.getElementById('manualAddrWrap');
+    const manualVisible = wrap && wrap.style.display !== 'none';
+    // Pilih kurir dulu
+    const kurir = document.getElementById('ckKurir');
+    if(kurir) state.checkoutData.kurir = kurir.value;
+    if(manualVisible || (!state.user || !state.addresses.length)) {
+      const name=document.getElementById('ckName')?.value||state.checkoutData.name;
+      const phone=document.getElementById('ckPhone')?.value||state.checkoutData.phone;
+      const addr=document.getElementById('ckAddr')?.value||state.checkoutData.address;
+      const city=document.getElementById('ckCity')?.value||state.checkoutData.city;
+      if(!name||!phone||!addr||!city){showToast('Lengkapi nama, HP, alamat, dan kota','error');return}
+      state.checkoutData.name=name;
+      state.checkoutData.phone=phone;
+      state.checkoutData.address=addr;
+      state.checkoutData.city=city;
+      state.checkoutData.zip=document.getElementById('ckZip')?.value||'';
+      state.checkoutData.province=document.getElementById('ckProv')?.value||'';
+    } else {
+      // pakai alamat yang dipilih
+      if(!state.checkoutData.name||!state.checkoutData.address){showToast('Pilih alamat pengiriman','error');return}
+    }
+  }
+  state.checkoutStep=step+1;
   renderCheckout();
 };
 
